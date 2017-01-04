@@ -11,6 +11,8 @@ class IslandCounter:
     def __init__(self, matrix):
         self.islands = []
         self.matrix = matrix
+        # in an oop sense, not sure if best practice is to find all islands on
+        # instantiation like I'm doing here, or only when they are called for
         self.find_islands()
 
 
@@ -43,29 +45,37 @@ class IslandCounter:
 
         while land_blocks:
 
+            # start new_island with first land_block
             new_island = [land_blocks[0]]
             check_new_island = True
 
             while check_new_island:
                 island_appended = False
                 used_land_blocks = []
+                # go though each piece of new_island to see if it is touching
+                # any of the remaining land_blocks
                 for i in range(len(new_island)):
                     for j in range(1,len(land_blocks)):
                         if self.is_touching(new_island[i], land_blocks[j]):
+                            # if touching new_island, add land_block to island
                             new_island.append(land_blocks[j])
                             island_appended = True
                             used_land_blocks.append(j)
+                    # remove the land_blocks that were added to new_island
                     if used_land_blocks:
                         for island_appended in reversed(used_land_blocks):
                             land_blocks.pop(island_appended)
                         used_land_blocks = []
+                # if new_island has been added to, loop new_island again to see
+                # if it is now touching any of the remaining land blocks
                 if island_appended:
                     check_new_island = True
                 else:
                     check_new_island = False
                     islands.append(new_island)
 
-
+            # remove the first land_block that was used to start the new_island
+            # from the list of land_blocks
             if land_blocks:
                 land_blocks.pop(0)
 
