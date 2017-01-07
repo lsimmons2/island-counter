@@ -21,7 +21,7 @@ Input
 
 Output
 
-4
+`4`
 
 ## Usage
 1. `pip install pandas` (only used for printing matrices)
