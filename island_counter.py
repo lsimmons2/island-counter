@@ -1,128 +1,90 @@
 
+from random import randint
 import numpy as np
 import pandas as pd
-
 
 
 class IslandCounter:
 
 
 
-    def __init__(self, matrix):
-        self.islands = []
-        self.matrix = matrix
-        # in an oop sense, not sure if best practice is to find all islands on
-        # instantiation like I'm doing here, or only when they are called for
-        self.find_islands()
+    def __init__(self, input_matrix):
+        self.input_matrix = input_matrix
+        self.init_visited_matrix()
+        self.row_count = len(input_matrix)
+        self.col_count = len(input_matrix[0])
+        self.count_islands()
 
 
 
-    def get_matrix(self):
-        return pd.DataFrame(np.array(self.matrix))
-
-
-
-    def is_touching(self, a, b):
-        if (a[0] == b[0] and abs(a[1]-b[1]) == 1) or (a[1] == b[1] and abs(a[0]-b[0]) == 1):
-            return True
-        return False
-
-
-
-    def find_islands(self):
-
-        # gets all the land_blocks, (any matrix element with value 1)
-        # not sure if this should be it's own method, say find_land_blocks()
-        # ============
-        land_blocks = []
-        for i in range(len(self.matrix)):
-            for j in range(len(self.matrix[i])):
-                if self.matrix[i][j] == 1:
-                    land_blocks.append((i,j))
-        # ============
-
-        islands = []
-
-        while land_blocks:
-
-            # start new_island with first land_block
-            new_island = [land_blocks[0]]
-            check_new_island = True
-
-            while check_new_island:
-                island_appended = False
-                used_land_blocks = []
-                # go though each piece of new_island to see if it is touching
-                # any of the remaining land_blocks
-                for i in range(len(new_island)):
-                    for j in range(1,len(land_blocks)):
-                        if self.is_touching(new_island[i], land_blocks[j]):
-                            # if touching new_island, add land_block to island
-                            new_island.append(land_blocks[j])
-                            island_appended = True
-                            used_land_blocks.append(j)
-                    # remove the land_blocks that were added to new_island
-                    if used_land_blocks:
-                        for island_appended in reversed(used_land_blocks):
-                            land_blocks.pop(island_appended)
-                        used_land_blocks = []
-                # if new_island has been added to, loop new_island again to see
-                # if it is now touching any of the remaining land blocks
-                if island_appended:
-                    check_new_island = True
-                else:
-                    check_new_island = False
-                    islands.append(new_island)
-
-            # remove the first land_block that was used to start the new_island
-            # from the list of land_blocks
-            if land_blocks:
-                land_blocks.pop(0)
-
-
-        self.islands = islands
-
-
-
-    def get_islands(self):
-        return self.islands
+    def init_visited_matrix(self):
+        visited_matrix = []
+        for i in range(len(self.input_matrix)):
+            row = []
+            for j in range(len(self.input_matrix[0])):
+                row.append(False)
+            visited_matrix.append(row)
+        self.visited_matrix = visited_matrix
 
 
 
     def count_islands(self):
-        return len(self.islands)
+        self.count = 0
+        for i in range(len(self.input_matrix)):
+            for j in range(len(self.input_matrix[i])):
+                if self.input_matrix[i][j] == 1 and not self.visited_matrix[i][j]:
+                    self.count += 1
+                    self.find_neighbors((i,j))
+
+
+
+    def find_neighbors(self, (i,j)):
+        self.visited_matrix[i][j] = True
+        if i-1 > -1 and self.input_matrix[i-1][j] == 1 and not self.visited_matrix[i-1][j]:
+            self.find_neighbors((i-1,j))
+        if j-1 > -1 and self.input_matrix[i][j-1] == 1 and not self.visited_matrix[i][j-1]:
+            self.find_neighbors((i,j-1))
+        if j+1 < self.col_count and self.input_matrix[i][j+1] == 1 and not self.visited_matrix[i][j+1]:
+            self.find_neighbors((i,j+1))
+        if i+1 < self.row_count and self.input_matrix[i+1][j] == 1 and not self.visited_matrix[i+1][j]:
+            self.find_neighbors((i+1,j))
+
+
+
+    def get_matrix(self):
+        return self.input_matrix
+
+
+
+    def get_island_count(self):
+        return self.count
+
+
 
 
 
 
 random_matrix = []
-for i in range(0,5):
+for i in range(0,7):
     row = []
-    for j in range(0,5):
-        row.append(np.random.randint(2))
+    for j in range(0,7):
+        row.append(randint(0,1))
     random_matrix.append(row)
 
 random_island_counter = IslandCounter(random_matrix)
-print 'random_matrix:\n', random_island_counter.get_matrix(), '\n'
-print 'islands:\n', np.array(random_island_counter.get_islands()), '\n'
-print '# of islands:\n', random_island_counter.count_islands(), '\n'
+print 'random_matrix:\n', pd.DataFrame(np.array(random_island_counter.get_matrix())), '\n'
+print '# of islands:\n', random_island_counter.get_island_count(), '\n'
 
 
-# row1 = [1,0,1,1,0]
-# row2 = [0,0,1,1,0]
-# row3 = [0,1,1,1,0]
-# row4 = [1,0,1,0,1]
-# row5 = [1,0,0,1,0]
-# set_matrix = [row1, row2, row3, row4, row5]
 
-row6 = [0,1,1,0,0,0,1]
-row7 = [0,1,0,0,1,1,0]
-row8 = [0,1,1,0,0,1,0]
-row9 = [0,0,0,0,0,0,0]
-row10 = [0,1,1,1,1,1,0]
-set_matrix = [row6, row7, row8, row9, row10]
+row1 = [0,1,1,0,0,0,1]
+row2 = [0,1,0,0,1,1,0]
+row3 = [0,1,1,0,0,1,0]
+row4 = [0,0,0,0,0,0,0]
+row5 = [0,1,1,1,1,1,0]
+set_input_matrix = [row1, row2, row3, row4, row5]
 
-set_island_counter = IslandCounter(set_matrix)
-print 'set_matrix:\n', set_island_counter.get_matrix(), '\n'
-print 'islands:\n', np.array(set_island_counter.get_islands()), '\n'
-print '# of islands:\n', set_island_counter.count_islands(), '\n'
+set_island_counter = IslandCounter(set_input_matrix)
+
+print 'set_matrix:\n', pd.DataFrame(np.array(set_island_counter.get_matrix())), '\n'
+print '# of islands:\n', set_island_counter.get_island_count(), '\n'
